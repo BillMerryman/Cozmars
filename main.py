@@ -1,8 +1,8 @@
 import os
 import time
 
-from Cozmars_Face_Control import face
 from Cozmars_Motor_Control import motors
+from Cozmars_Face_Control import face
 
 def salute_up():
 	motors.set_lift(80)

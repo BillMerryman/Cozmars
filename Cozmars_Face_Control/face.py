@@ -48,6 +48,7 @@ class FaceAnimate(threading.Thread):
 		self.face_offset_x = 0
 		self.face_offset_y = 0
 		self.face = Image.open("GraphicDev/sarge_eye_transparent.png")
+		self.face.load()		
 		self.running = True
 		random.seed()
 
@@ -60,6 +61,7 @@ class FaceAnimate(threading.Thread):
 
 	def set_face(self, face_file_name):
 		self.face = Image.open(face_file_name)
+		self.face.load()
 		self.show_face()
 
 	def get_background(self, R, G, B):

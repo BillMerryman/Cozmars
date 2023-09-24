@@ -1,0 +1,79 @@
+CREATE INITIAL SD CARD IMAGE
+
+	#Use Raspberry Pi Imager to install a clean image of 32 bit Bullseye
+	#Make sure to enable SSH and Wifi during the process.
+	#On first boot, get a command line via SSH:
+
+	sudo apt-get update
+	sudo apt-get upgrade
+
+	sudo raspi-config 
+	# DON'T reboot when finished, configure the following and exit:
+	#	Display Options
+	#		VNC Resolution
+	#	Interface Options
+	#		VNC
+	
+	sudo nano /etc/vnc/config.d/common.custom
+	#enter the following line, save, and exit:
+	#	Authentication=None
+
+	sudo reboot
+	#You should now be able to connect via VNC
+
+CHECK CAMERA
+
+	cat /boot/config.txt 
+	#should contain the following:
+	#
+	#	# Automatically load overlays for detected cameras
+	#	camera_auto_detect=1
+
+	#Test camera
+	libcamera-hello
+
+INSTALL SCREEN DRIVER
+
+	sudo nano /boot/config.txt
+	#Delete the # in front of the following, save, and exit:
+	#	#dtparam=spi=on
+
+	sudo reboot
+	sudo pip3 install adafruit-circuitpython-rgb-display
+
+ENABLE AUDIO
+
+	sudo nano /boot/config.txt	
+	
+	#comment out this line:
+	#	dtparam=audio=on
+
+	#add these two lines immediately after, save, and exit
+	#	dtoverlay=hifiberry-dac
+	#	dtoverlay=i2s-mmap
+
+ENABLE SERVOS
+
+	sudo raspi-config
+	#	Interface Options
+	#		I2C
+	sudo pip3 install adafruit-circuitpython-servokit
+
+ENABLE RANGE SENSOR
+
+	sudo pip3 install adafruit-circuitpython-hcsr04
+
+ENABLE MICROPHONE
+
+	cd ~
+	sudo pip3 install --upgrade adafruit-python-shell
+	wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2smic.py
+	sudo python3 i2smic.py
+
+ENABLE OPENCV
+
+	sudo pip install opencv-python
+	sudo apt-get install libatlas-base-dev
+	sudo pip install -U numpy
+
+	
