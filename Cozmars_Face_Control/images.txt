@@ -1,0 +1,2 @@
+sarge_eye_transparent.png
+sarge_eye_squint_transparent.png

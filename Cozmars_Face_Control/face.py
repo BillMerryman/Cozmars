@@ -1,3 +1,4 @@
+import os
 import threading
 import random
 import time
@@ -47,10 +48,23 @@ class FaceAnimate(threading.Thread):
 		threading.Thread.__init__(self)
 		self.face_offset_x = 0
 		self.face_offset_y = 0
-		self.face = Image.open("GraphicDev/sarge_eye_transparent.png")
-		self.face.load()		
+		self.images = {}
+		self.load_images(os.getcwd() + "/Cozmars_Face_Control/images.txt")
+		self.face_key = list(self.images.keys())[0]
+		self.face = self.images[self.face_key]		
 		self.running = True
 		random.seed()
+
+	def load_images(self, file_list_path):
+		try:
+			with open(file_list_path, 'r') as file:
+				for line in file:
+					image_filename = line.strip()
+					key = image_filename.split('.')[0]
+					image = Image.open(os.getcwd() + "/Cozmars_Graphics/" + image_filename)
+					self.images[key] = image
+		except Exception as e:
+			print(f"{e}")
 
 	def run(self):
 		while self.running:
@@ -59,9 +73,8 @@ class FaceAnimate(threading.Thread):
 			self.face_offset_y = random.randint(-5, 5)
 			self.show_face()
 
-	def set_face(self, face_file_name):
-		self.face = Image.open(face_file_name)
-		self.face.load()
+	def set_face(self, face_name):
+		self.face = self.images[face_name]
 		self.show_face()
 
 	def get_background(self, R, G, B):
