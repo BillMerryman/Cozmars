@@ -6,7 +6,7 @@ from Cozmars_Motor_Control import motors
 
 def salute_up():
 	motors.set_lift(80)
-	motors.set_head(100)
+	motors.set_head(110)
 
 def salute_down():
 	motors.set_lift(20)

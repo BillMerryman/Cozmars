@@ -2,16 +2,10 @@ import os
 import threading
 import random
 import time
-import asyncio
 import digitalio
 import board
 from PIL import Image, ImageDraw
-from adafruit_rgb_display import ili9341
-from adafruit_rgb_display import st7789  # pylint: disable=unused-import
-from adafruit_rgb_display import hx8357  # pylint: disable=unused-import
-from adafruit_rgb_display import st7735  # pylint: disable=unused-import
-from adafruit_rgb_display import ssd1351  # pylint: disable=unused-import
-from adafruit_rgb_display import ssd1331  # pylint: disable=unused-import
+from adafruit_rgb_display import st7789
 
 # Configuration for CS and DC pins (these are PiTFT defaults):
 cs_pin = digitalio.DigitalInOut(board.CE0)
@@ -46,6 +40,7 @@ else:
 class FaceAnimate(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
+		self.lock = threading.Lock()
 		self.face_offset_x = 0
 		self.face_offset_y = 0
 		self.images = {}
@@ -53,6 +48,7 @@ class FaceAnimate(threading.Thread):
 		self.face_key = list(self.images.keys())[0]
 		self.face = self.images[self.face_key]		
 		self.running = True
+
 		random.seed()
 
 	def load_images(self, file_list_path):
@@ -86,7 +82,8 @@ class FaceAnimate(threading.Thread):
 	def show_face(self):
 		background = self.get_background(int("6B", 16), int("8E", 16), int("23",16))
 		background.paste(self.face, (self.face_offset_x, self.face_offset_y), self.face)
-		disp.image(background)
+		with self.lock:		
+			disp.image(background)
 
 	def stop(self):
 		self.running = False
