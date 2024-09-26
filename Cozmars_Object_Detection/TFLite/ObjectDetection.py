@@ -10,6 +10,7 @@ LABEL_SIZE = 0.5
 
 import cv2
 import numpy as np
+from picamera2 import Picamera2
 
 if RUNTIME_ONLY:
     from tflite_runtime.interpreter import Interpreter
@@ -28,12 +29,14 @@ with open(LABEL_MAP, 'r') as f:
     labels = [line.strip() for line in f.readlines()]
 colors = np.random.randint(0, 255, size=(len(labels), 3), dtype='uint8')
 
-cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, IMG_WIDTH)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, IMG_HEIGHT)
+lsize = (640, 480)
+picam2 = Picamera2()
+video_config = picam2.create_video_configuration(main={"size": (640, 480), "format": "RGB888"}, lores={"size": lsize, "format": "YUV420"})
+picam2.configure(video_config)
+picam2.start()
 
-while cap.isOpened():
-    success, frame = cap.read()
+while cv2.waitKey(1) == -1:
+    frame = picam2.capture_array()
     frame = cv2.flip(frame, flipCode=-1)
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     frame_resized = cv2.resize(frame_rgb, (width, height))
@@ -71,5 +74,4 @@ while cap.isOpened():
     if cv2.waitKey(1) == ord('q'):
         break
 
-cap.release()
 cv2.destroyAllWindows()

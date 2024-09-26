@@ -20,6 +20,25 @@ CREATE INITIAL SD CARD IMAGE
 
 	sudo reboot
 	#You should now be able to connect via VNC
+	
+IF SWAP FILE MANIPULATION IS NEEDED
+
+	If a swap greater than 2GB is needed, you will need to edit CONF_SWAPSIZE in /etc/dphys-swapfile:
+	
+		sudo nano /etc/dphys-swapfile
+	
+	To edit swap file:
+	
+		sudo nano /sbin/dphys-swapfile
+		CONF_SWAPSIZE=100 //edit to whatever is needed
+		sudo reboot
+		
+	You can also do it online:
+	
+		sudo dphys-swapfile swapoff
+		sudo nano /sbin/dphys-swapfile //do your edit
+		sudo dphys-swapfile setup
+		sudo dphys-swapfile swapon
 
 CHECK CAMERA
 
@@ -30,7 +49,7 @@ CHECK CAMERA
 	#	camera_auto_detect=1
 
 	#Test camera
-	libcamera-hello
+	libcamera-vid --qt-preview
 
 INSTALL SCREEN DRIVER
 
@@ -62,6 +81,7 @@ ENABLE SERVOS
 ENABLE RANGE SENSOR
 
 	sudo pip3 install adafruit-circuitpython-hcsr04
+	sudo apt-get install libgpiod2
 
 ENABLE MICROPHONE
 
@@ -69,11 +89,71 @@ ENABLE MICROPHONE
 	sudo pip3 install --upgrade adafruit-python-shell
 	wget https://raw.githubusercontent.com/adafruit/Raspberry-Pi-Installer-Scripts/master/i2smic.py
 	sudo python3 i2smic.py
+			
+	CURRENT APPROACH:
+	
+		Follow directions from "WHAT SEEMS TO WORK AT KEEPING PULSEAUDIO FROM DELETING .asoundrc" below
+		sudo apt-get install pavumeter pavucontrol paprefs
+		Open pavucontrol/Playback tab
+		Run 
+			padsp /opt/swift/bin/swift "Listen up soldier! You can bite my rusty metal azz!"
+		While that is running, adjust the volume of "OSS Emulation" to 140%
+		Close pavucontrol
+		alsamixer
+		F6 - 0 - F4
+		make sure volume is way down (like 10)
+		arecord -D dmic_sv -c2 -r 48000 -f S32_LE -t wav -V mono -v --duration 5 file.wav
+		go back to alsamixer and adjust level as necessary
+		
+	
+	WHAT SEEMS TO WORK AT KEEPING PULSEAUDIO FROM DELETING .asoundrc:
 
+		sudo apt-get remove --purge pulseaudio
+		sudo reboot
+		(make sure alsamixer is turned down, especially for capture)
+		Copy asoundrc from the CozmarsDev folder to the home folder and rename to .asoundrc
+		sudo apt-get install pulseaudio
+		sudo reboot
+
+	attempts at using just ALSA:
+	
+		sudo apt-get remove --purge pulseaudio
+		sudo apt-get install alsa-oss
+		copy asoundrc to ~ folder
+		use aoss to output Cepstral
+		Test recording with:
+			arecord -D dmic_sv -c2 -r 48000 -f S32_LE -t wav -V mono -v --duration 5 file.wav
+
+	attempts at using just Pulseaudio:
+		sudo apt-get install pavumeter pavucontrol paprefs
+		work with pavucontrol
+		Also use:
+			pactl set-source-volume @DEFAULT_SOURCE@ +{some number in 1000s}
+		use padsp to output Cepstral
+		Test record with:
+			parecord --channels=2 --rate=48000 --format=s32le --file-format=wav --process-time-msec=5000 file.wav
+
+INSTALL CEPSTRAL
+
+	Copy install package to machine and unzip
+	cd to directory
+	sudo ./install.sh
+	to install license:
+	sudo /opt/swift/bin/swift --reg-voice
+	
 ENABLE OPENCV
 
-	sudo pip install opencv-python
+	sudo apt-get install libopenblas-dev
 	sudo apt-get install libatlas-base-dev
-	sudo pip install -U numpy
-
+	sudo pip3 install -U numpy
+	sudo pip3 install opencv-python==4.5.3.56
 	
+ENABLE TFLITE
+
+	sudo pip3 install tflite-runtime
+
+ENABLE VOSK (Speech recognition)
+
+	sudo pip install vosk
+	sudo pip install sounddevice
+	sudo apt-get install portaudio19-dev
